@@ -123,7 +123,7 @@ class QuizScreen extends StatelessWidget {
                     ],
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 100),
 
                   // ================= QUESTION =================
                   Text(
@@ -138,7 +138,7 @@ class QuizScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 50),
 
                   // ================= ANSWERS =================
                   Expanded(
