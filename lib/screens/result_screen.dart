@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/quiz_provider.dart';
 import 'home_screen.dart';
+import 'quiz_screen.dart'; // ✅ ADD THIS (your real quiz screen)
 
 class ResultScreen extends StatelessWidget {
   const ResultScreen({super.key});
@@ -12,10 +13,11 @@ class ResultScreen extends StatelessWidget {
     final provider = Provider.of<QuizProvider>(context, listen: false);
     final score = provider.score;
     final total = provider.totalQuestions;
-    final correct = provider.correctAnswers;
-    final incorrect = provider.incorrectAnswers;
-    final timeTaken =
-        provider.timeTaken; // make sure this is available in provider
+
+    // Derive correct/incorrect safely
+    final correct = score;
+    final incorrect = total - score;
+
     Color primary = const Color(0xFF1392EC);
 
     return Scaffold(
@@ -50,7 +52,7 @@ class ResultScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 48), // placeholder for centering
+                  const SizedBox(width: 48),
                 ],
               ),
             ),
@@ -70,7 +72,7 @@ class ResultScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'You scored ${(score / total * 100).toStringAsFixed(0)}%',
+              'You scored ${(score / (total == 0 ? 1 : total) * 100).toStringAsFixed(0)}%',
               style: TextStyle(
                 fontSize: 16,
                 color: Theme.of(context).brightness == Brightness.dark
@@ -92,7 +94,7 @@ class ResultScreen extends StatelessWidget {
                     width: 160,
                     height: 160,
                     child: CircularProgressIndicator(
-                      value: score / total,
+                      value: total == 0 ? 0.0 : score / total,
                       strokeWidth: 12,
                       backgroundColor:
                           Theme.of(context).brightness == Brightness.dark
@@ -131,7 +133,7 @@ class ResultScreen extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            // Quiz statistics cards
+            // Quiz statistics cards (correct/incorrect only)
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -151,14 +153,6 @@ class ResultScreen extends StatelessWidget {
                       value: incorrect,
                       bgColor: Colors.red.withOpacity(0.2),
                     ),
-                    CardStat(
-                      icon: Icons.timer,
-                      iconColor: Colors.blue,
-                      label: 'Time Taken',
-                      value: timeTaken,
-                      bgColor: Colors.blue.withOpacity(0.2),
-                      isTime: true,
-                    ),
                   ],
                 ),
               ),
@@ -169,6 +163,7 @@ class ResultScreen extends StatelessWidget {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
+                  // Retry
                   SizedBox(
                     width: double.infinity,
                     height: 50,
@@ -183,7 +178,7 @@ class ResultScreen extends StatelessWidget {
                         provider.restart();
                         Navigator.of(context).pushReplacement(
                           MaterialPageRoute(
-                            builder: (_) => const QuizScreenWrapper(),
+                            builder: (context) => const QuizScreen(),
                           ),
                         );
                       },
@@ -196,7 +191,10 @@ class ResultScreen extends StatelessWidget {
                       ),
                     ),
                   ),
+
                   const SizedBox(height: 12),
+
+                  // Back to home
                   SizedBox(
                     width: double.infinity,
                     height: 50,
@@ -233,14 +231,14 @@ class ResultScreen extends StatelessWidget {
   }
 }
 
-// Helper widget for stats cards
+// ---------------- CARD STAT WIDGET ----------------
+
 class CardStat extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
   final String label;
   final dynamic value;
   final Color bgColor;
-  final bool isTime;
 
   const CardStat({
     super.key,
@@ -249,12 +247,12 @@ class CardStat extends StatelessWidget {
     required this.label,
     required this.value,
     required this.bgColor,
-    this.isTime = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    String displayValue = isTime ? value.toString() : value.toString();
+    String displayValue = value.toString();
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -302,18 +300,6 @@ class CardStat extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-// Wrapper to avoid import cycle with home -> quiz -> result
-class QuizScreenWrapper extends StatelessWidget {
-  const QuizScreenWrapper({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: SafeArea(child: Center(child: Text(''))),
     );
   }
 }
