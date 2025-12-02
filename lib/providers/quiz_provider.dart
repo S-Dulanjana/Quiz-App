@@ -15,6 +15,12 @@ class QuizProvider with ChangeNotifier {
   int _timeLeft = 10; // seconds per question
   int _highScore = 0;
 
+  var correctAnswers;
+
+  var incorrectAnswers;
+
+  var timeTaken;
+
   QuizProvider({List<Question>? questions})
     : questions = questions ?? sampleQuestions {
     _loadHighScore();

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quiz_app/screens/start_screen.dart';
 import 'providers/quiz_provider.dart';
-import 'screens/home_screen.dart';
 
 void main() {
   runApp(const QuizApp());

@@ -12,52 +12,295 @@ class ResultScreen extends StatelessWidget {
     final provider = Provider.of<QuizProvider>(context, listen: false);
     final score = provider.score;
     final total = provider.totalQuestions;
-    final highScore = provider.highScore;
+    final correct = provider.correctAnswers;
+    final incorrect = provider.incorrectAnswers;
+    final timeTaken =
+        provider.timeTaken; // make sure this is available in provider
+    Color primary = const Color(0xFF1392EC);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Result')),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
+      body: SafeArea(
         child: Column(
           children: [
-            const SizedBox(height: 30),
-            Text('Your Score', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 10),
-            Text(
-              '$score / $total',
-              style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'High Score: $highScore',
-              style: const TextStyle(fontSize: 16),
-            ),
-            const Spacer(),
-            ElevatedButton(
-              onPressed: () {
-                provider.restart();
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (_) => const QuizScreenWrapper()),
-                );
-              },
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 18.0, vertical: 12),
-                child: Text('Retry Quiz', style: TextStyle(fontSize: 16)),
+            // Header with back button
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back_ios_new),
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black87,
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  Expanded(
+                    child: Center(
+                      child: Text(
+                        'Results',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white
+                              : Colors.black87,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 48), // placeholder for centering
+                ],
               ),
             ),
-            const SizedBox(height: 12),
-            OutlinedButton(
-              onPressed: () {
-                provider.restart();
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (_) => const HomeScreen()),
-                );
-              },
-              child: const Text('Back to Home'),
+
+            const SizedBox(height: 20),
+
+            // Title and score percentage
+            Text(
+              'Great Job!',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white
+                    : Colors.black87,
+              ),
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 8),
+            Text(
+              'You scored ${(score / total * 100).toStringAsFixed(0)}%',
+              style: TextStyle(
+                fontSize: 16,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.grey.shade300
+                    : Colors.grey.shade700,
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Circular score visualization
+            SizedBox(
+              width: 160,
+              height: 160,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  SizedBox(
+                    width: 160,
+                    height: 160,
+                    child: CircularProgressIndicator(
+                      value: score / total,
+                      strokeWidth: 12,
+                      backgroundColor:
+                          Theme.of(context).brightness == Brightness.dark
+                          ? Colors.grey.shade800
+                          : Colors.grey.shade200,
+                      color: primary,
+                    ),
+                  ),
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '$score / $total',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white
+                              : Colors.black87,
+                        ),
+                      ),
+                      Text(
+                        'Completed',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.grey.shade300
+                              : Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Quiz statistics cards
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  children: [
+                    CardStat(
+                      icon: Icons.check,
+                      iconColor: Colors.green,
+                      label: 'Correct Answers',
+                      value: correct,
+                      bgColor: Colors.green.withOpacity(0.2),
+                    ),
+                    CardStat(
+                      icon: Icons.close,
+                      iconColor: Colors.red,
+                      label: 'Incorrect Answers',
+                      value: incorrect,
+                      bgColor: Colors.red.withOpacity(0.2),
+                    ),
+                    CardStat(
+                      icon: Icons.timer,
+                      iconColor: Colors.blue,
+                      label: 'Time Taken',
+                      value: timeTaken,
+                      bgColor: Colors.blue.withOpacity(0.2),
+                      isTime: true,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Footer buttons
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () {
+                        provider.restart();
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (_) => const QuizScreenWrapper(),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        'Retry Quiz',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: primary),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () {
+                        provider.restart();
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(builder: (_) => const HomeScreen()),
+                        );
+                      },
+                      child: Text(
+                        'Return to Home',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: primary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// Helper widget for stats cards
+class CardStat extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String label;
+  final dynamic value;
+  final Color bgColor;
+  final bool isTime;
+
+  const CardStat({
+    super.key,
+    required this.icon,
+    required this.iconColor,
+    required this.label,
+    required this.value,
+    required this.bgColor,
+    this.isTime = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    String displayValue = isTime ? value.toString() : value.toString();
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Colors.grey.shade800
+            : Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: bgColor,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: iconColor),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black87,
+                ),
+              ),
+            ],
+          ),
+          Text(
+            displayValue,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white
+                  : Colors.black87,
+            ),
+          ),
+        ],
       ),
     );
   }
